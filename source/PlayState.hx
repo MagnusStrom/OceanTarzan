@@ -28,24 +28,23 @@ class PlayState extends FlxState
 	override public function create()
 	{
 		super.create();
-
+		FlxG.fixedTimestep = false;
 		player = new Player(100, 100);
 		add(player);
 		verlet = new Verlet({
+			x: 0,
+			y: 0,
 			width: FlxG.width,
 			height: FlxG.height,
-			gravity_y: 100
+			gravity_y: 20
 		});
-		var rope = Verlet.rope([for (i in 0...2) new Vector2(80 + i * 10, 70)], 0.5, [0]); // verlet.add(rope);
-		verlet.composites.push(rope);
 		lineSprite = new FlxSprite(0, 0);
 		add(lineSprite);
 		lineSprite.makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT);
 		ground = new FlxSprite(0, FlxG.height - 100).makeGraphic(500, 50);
 		add(ground);
 		ground.immovable = true;
-		debug = new FlxText(100, 100, FlxG.width,
-			"DEBUG:\nRope Point 0: " + rope.dots[0].x + ", " + rope.dots[0].y + "\nRope Point 1: " + rope.dots[1].x + ", " + rope.dots[1].y);
+		debug = new FlxText(100, 100, FlxG.width, "Rope to load debug stats.");
 		debug.color = FlxColor.WHITE;
 		add(debug);
 	}
@@ -53,7 +52,6 @@ class PlayState extends FlxState
 	override public function update(elapsed:Float)
 	{
 		super.update(elapsed);
-
 		// GRAVITY CUYZ IUT WANTS IT HERE AN A+M LAZY
 		if (FlxG.collide(player, ground))
 		{
@@ -69,26 +67,36 @@ class PlayState extends FlxState
 		if (FlxG.mouse.justPressed)
 		{
 			mouseused = true;
-			ropepoints = verlet.composites[0].dots;
-			trace("Updated point");
-			ropepoints[1].set_position(new Vector2(player.x, player.y));
+			var rope = Verlet.rope([new Vector2(FlxG.mouse.x, FlxG.mouse.y), new Vector2(player.x, player.y)], 0.7, [0]); // verlet.add(rope);
+			verlet.composites.push(rope);
+			trace("Rope added");
 		}
 		if (FlxG.mouse.justReleased)
 		{
 			mouseused = false;
+			verlet.composites.pop(); // hopefully this works
+			trace("Rope removed");
 		}
 
 		if (mouseused)
 		{
 			verlet.step(elapsed);
+			ropepoints = verlet.composites[0].dots; // set again after step
 			FlxSpriteUtil.fill(lineSprite, FlxColor.TRANSPARENT);
-			ropepoints = verlet.composites[0].dots;
-			ropepoints[0].set_position(new Vector2(FlxG.mouse.x, FlxG.mouse.y)); // fuck vectors <3
 			FlxSpriteUtil.drawLine(lineSprite, ropepoints[0].x, ropepoints[0].y, ropepoints[1].x, ropepoints[1].y);
 			player.setPosition(ropepoints[1].x, ropepoints[1].y);
 
 			// debug
-			debug.text = "DEBUG:\nRope Point 0: " + ropepoints[0].x + ", " + ropepoints[0].y + "\nRope Point 1: " + ropepoints[1].x + ", " + ropepoints[1].y;
+			debug.text = "DEBUG:\nRope Point 0: "
+				+ ropepoints[0].x + ", " + ropepoints[0].y + "\nRope Point 1: " + ropepoints[1].x + ", " + ropepoints[1].y
+					+ "\nPlayer: "
+					+ player.x
+					+ ", "
+					+ player.y
+					+ "\nMouse: "
+					+ FlxG.mouse.x
+					+ ", "
+					+ FlxG.mouse.y;
 		}
 
 		// unused untill latrer ig
