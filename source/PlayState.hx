@@ -7,6 +7,7 @@ import echo.util.verlet.Verlet;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
@@ -21,7 +22,7 @@ class PlayState extends FlxState
 	var player:Player;
 	var ropepoints:Array<Dot>;
 	var lineSprite:FlxSprite;
-	var ground:FlxSprite;
+	var ground:FlxTypedGroup<Ground>;
 	var mouseused:Bool;
 	var debug:FlxText;
 
@@ -41,9 +42,11 @@ class PlayState extends FlxState
 		lineSprite = new FlxSprite(0, 0);
 		add(lineSprite);
 		lineSprite.makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT);
-		ground = new FlxSprite(0, FlxG.height - 100).makeGraphic(500, 50);
+		ground = new FlxTypedGroup<Ground>();
 		add(ground);
-		ground.immovable = true;
+		// test level
+		//	ground.add(new Ground(0, FlxG.height - 50, 200, 50));
+		ground.add(new Ground(500, FlxG.height - 50, 200, 50));
 		debug = new FlxText(100, 100, FlxG.width, "Rope to load debug stats.");
 		debug.color = FlxColor.WHITE;
 		add(debug);
@@ -74,6 +77,11 @@ class PlayState extends FlxState
 		if (FlxG.mouse.justReleased)
 		{
 			mouseused = false;
+			// apply last point velocity to player
+			player.velocity.x = ropepoints[ropepoints.length - 1].dx - (player.drag.x / 4);
+			player.velocity.y = ropepoints[ropepoints.length - 1].dy - (player.drag.y / 2);
+			// clear rope
+			FlxSpriteUtil.fill(lineSprite, FlxColor.TRANSPARENT);
 			verlet.composites.pop(); // hopefully this works
 			trace("Rope removed");
 		}
