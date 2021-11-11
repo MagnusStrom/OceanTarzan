@@ -28,7 +28,6 @@ class Player extends FlxSprite
 		offset.y = -35;
 		// gravity
 		acceleration.y = 400;
-		maxVelocity.y = 200;
 		drag.x = drag.y = 500;
 		// elasticity = 0.05;
 	}
@@ -60,7 +59,7 @@ class Player extends FlxSprite
 		{
 			if (touchingground)
 			{
-				velocity.y = -600;
+				velocity.y = -200;
 			}
 			// y -= elapsed * 100;
 		}

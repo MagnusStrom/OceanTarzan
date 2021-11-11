@@ -33,6 +33,7 @@ class PlayState extends FlxState
 	var tutorialText:FlxText;
 	var connected:Bool = false;
 	var launch:Bool = false;
+	var ropeStartingPointX:Float = 0;
 
 	override public function create()
 	{
@@ -60,7 +61,7 @@ class PlayState extends FlxState
 		//	ground.add(new Ground(0, FlxG.height - 50, 200, 50));
 		debug = new FlxText(100, 100, FlxG.width, "Rope to load debug stats.");
 		debug.color = FlxColor.WHITE;
-		// add(debug);
+		add(debug);
 	}
 
 	// Load New Level
@@ -112,7 +113,7 @@ class PlayState extends FlxState
 
 		// stolen from other game that flopped cuz no good physics :(
 
-		if (FlxG.keys.anyPressed([E, M]))
+		if (FlxG.keys.anyPressed([E, M, Q]))
 		{
 			launch = true;
 		}
@@ -128,6 +129,8 @@ class PlayState extends FlxState
 			mouseused = true;
 			var rope = Verlet.rope([new Vector2(FlxG.mouse.x, FlxG.mouse.y), new Vector2(player.x, player.y)], 0.7, [0]); // verlet.add(rope);
 			verlet.composites.push(rope);
+			// track starting point of rope
+			ropeStartingPointX = player.x;
 			trace("Rope added");
 		}
 
@@ -148,16 +151,14 @@ class PlayState extends FlxState
 			}
 
 			// debug
-			debug.text = "DEBUG:\nRope Point 0: "
-				+ ropepoints[0].x + ", " + ropepoints[0].y + "\nRope Point 1: " + ropepoints[1].x + ", " + ropepoints[1].y
-					+ "\nPlayer: "
+			debug.text = "DEBUG:\nSTARTING ROPE POINT:"
+				+ ropeStartingPointX
+				+ "\nROPE POINT 1:"
+				+ ropepoints[0].x + "\nROPE POINT 2:" + ropepoints[1].x
+					+ "\nPLAYER X:"
 					+ player.x
-					+ ", "
-					+ player.y
-					+ "\nMouse: "
-					+ FlxG.mouse.x
-					+ ", "
-					+ FlxG.mouse.y;
+					+ "\nPLAYER Y:"
+					+ player.y;
 		}
 
 		if (FlxG.mouse.justReleased)
@@ -176,8 +177,20 @@ class PlayState extends FlxState
 					{
 						player.velocity.x = (ropepoints[ropepoints.length - 1].dx - (!launch ? (player.drag.x / 4) : 0)) * (!player.facingLeft ? -1 : 1);
 				}*/
-				player.velocity.x = player.fakeVelocityX;
-				player.velocity.y = !launch ? 0 : -600;
+
+				if (ropeStartingPointX > player.x)
+				{
+					trace("Player is swinging left.");
+					player.velocity.x = (ropepoints[ropepoints.length - 1].dx - (player.drag.x / 4)) * -1;
+				}
+				else
+				{
+					trace("Player is swinging right.");
+					player.velocity.x = ropepoints[ropepoints.length - 1].dx - (player.drag.x / 4);
+				}
+				// player.velocity.y = ropepoints[ropepoints.length - 1].dy - (player.drag.y / 2);
+				// player.velocity.x = (ropeStartingPointX - player.x) * -1;
+				player.velocity.y = !launch ? 0 : -400;
 			}
 			// clear rope
 			FlxSpriteUtil.fill(lineSprite, FlxColor.TRANSPARENT);
