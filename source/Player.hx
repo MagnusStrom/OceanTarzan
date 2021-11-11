@@ -11,12 +11,33 @@ class Player extends FlxSprite
 	public function new(x, y)
 	{
 		super(x, y);
-		makeGraphic(20, 20, 0xFFFFFFFF);
+		loadGraphic("assets/images/Ninjah.png", true, 32, 32);
+		animation.add("idle", [0, 1], 2, true);
+		animation.add("swingL", [3], 1, true);
+		animation.add("swingR", [2], 1, true);
+		animation.play("idle");
+		setGraphicSize(100, 100);
+		updateHitbox();
+		width = 30;
+		offset.x = 5;
+		height = 80;
+		offset.y = -35;
 		// gravity
 		acceleration.y = 400;
 		maxVelocity.y = 200;
 		drag.x = drag.y = 500;
 		// elasticity = 0.05;
+	}
+
+	// respawn
+	public function respawn()
+	{
+		x = 100;
+		y = 100;
+		velocity.x = 0;
+		velocity.y = 0;
+		touchingground = false;
+		animation.play("idle");
 	}
 
 	override public function update(elapsed:Float):Void
@@ -41,10 +62,9 @@ class Player extends FlxSprite
 		{
 			y += elapsed * 100;
 		}
-		if (FlxG.keys.pressed.R)
+		if (FlxG.keys.pressed.R || y > FlxG.height)
 		{
-			x = 100;
-			y = 100;
+			respawn();
 		}
 		super.update(elapsed);
 	}
