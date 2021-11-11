@@ -5,6 +5,7 @@ import echo.util.verlet.Constraints;
 import echo.util.verlet.Dot;
 import echo.util.verlet.Verlet;
 import flixel.FlxG;
+import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -31,6 +32,7 @@ class PlayState extends FlxState
 	var levelText:FlxText;
 	var tutorialText:FlxText;
 	var connected:Bool = false;
+	var launch:Bool = false;
 
 	override public function create()
 	{
@@ -53,6 +55,7 @@ class PlayState extends FlxState
 		ground = new FlxTypedGroup<Ground>();
 		trash = new FlxTypedGroup<Trash>();
 		add(ground);
+		add(trash); // how did i forget this bruh
 		// test level
 		//	ground.add(new Ground(0, FlxG.height - 50, 200, 50));
 		debug = new FlxText(100, 100, FlxG.width, "Rope to load debug stats.");
@@ -82,10 +85,14 @@ class PlayState extends FlxState
 		}
 	}
 
+	function collectTrash(player:FlxObject, trash:FlxObject)
+	{
+		trash.kill();
+	}
+
 	override public function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		verlet.step(elapsed);
 		// load level if not loaded
 		if (level > savedlevel)
 		{
@@ -101,11 +108,21 @@ class PlayState extends FlxState
 			player.touchingground = false;
 		}
 
+		FlxG.overlap(player, trash, collectTrash);
+
 		// stolen from other game that flopped cuz no good physics :(
 
-		if (FlxG.mouse.justPressed)
+		if (FlxG.keys.anyPressed([E, M]))
 		{
-			verlet.composites.pop(); // hopefully this works
+			launch = true;
+		}
+		else
+		{
+			launch = false;
+		}
+
+		if (FlxG.mouse.justPressed)
+		{ // hopefully this works
 			connected = true;
 			player.animation.play("swingL");
 			mouseused = true;
@@ -113,23 +130,10 @@ class PlayState extends FlxState
 			verlet.composites.push(rope);
 			trace("Rope added");
 		}
-		if (FlxG.mouse.justReleased)
-		{
-			player.animation.play("idle");
-			mouseused = false;
-			// apply last point velocity to player
-			if (connected == true)
-			{
-				player.velocity.x = ropepoints[ropepoints.length - 1].dx - (player.drag.x / 4);
-				player.velocity.y = ropepoints[ropepoints.length - 1].dy - (player.drag.y / 2);
-			}
-			// clear rope
-			FlxSpriteUtil.fill(lineSprite, FlxColor.TRANSPARENT);
-			trace("Rope removed");
-		}
 
 		if (mouseused)
 		{
+			verlet.step(elapsed);
 			ropepoints = verlet.composites[0].dots; // set again after step
 			FlxSpriteUtil.fill(lineSprite, FlxColor.TRANSPARENT);
 			FlxSpriteUtil.drawLine(lineSprite, ropepoints[0].x, ropepoints[0].y, ropepoints[1].x, ropepoints[1].y + 40 /*Adjusted to fit hand*/);
@@ -154,6 +158,30 @@ class PlayState extends FlxState
 					+ FlxG.mouse.x
 					+ ", "
 					+ FlxG.mouse.y;
+		}
+
+		if (FlxG.mouse.justReleased)
+		{
+			verlet.composites.pop();
+			player.animation.play("idle");
+			mouseused = false;
+			// apply last point velocity to player
+			if (connected == true)
+			{
+				/*	if (ropepoints[ropepoints.length - 1].dx > 0)
+					{
+						player.velocity.x = (ropepoints[ropepoints.length - 1].dx - (!launch ? (player.drag.x / 4) : 0)) * (player.facingLeft ? -1 : 1);
+					}
+					else
+					{
+						player.velocity.x = (ropepoints[ropepoints.length - 1].dx - (!launch ? (player.drag.x / 4) : 0)) * (!player.facingLeft ? -1 : 1);
+				}*/
+				player.velocity.x = player.fakeVelocityX;
+				player.velocity.y = !launch ? 0 : -600;
+			}
+			// clear rope
+			FlxSpriteUtil.fill(lineSprite, FlxColor.TRANSPARENT);
+			trace("Rope removed");
 		}
 
 		// unused untill latrer ig

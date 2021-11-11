@@ -11,7 +11,8 @@ class Trash extends FlxSprite
 	{
 		super(x, y);
 		loadGraphic("assets/images/Trash.png", true, 32, 32);
-		animation.frameIndex = FlxG.random.int(0, 4);
+		animation.randomFrame(); // nice
+		trace(animation.frameIndex);
 		setGraphicSize(100, 100);
 	}
 

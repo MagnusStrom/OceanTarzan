@@ -19,7 +19,7 @@ class ApplicationMain
 
 		#if (js && html5)
 		#if (munit || utest)
-		lime.system.System.embed("OceanTarzan", null, 640, 480);
+		lime.system.System.embed("OceanTarzan", null, 740, 580);
 		#end
 		#else
 		create(null);
@@ -32,7 +32,7 @@ class ApplicationMain
 
 		ManifestResources.init(config);
 
-		app.meta["build"] = "3";
+		app.meta["build"] = "4";
 		app.meta["company"] = "HaxeFlixel";
 		app.meta["file"] = "OceanTarzan";
 		app.meta["name"] = "OceanTarzan";
@@ -51,14 +51,14 @@ class ApplicationMain
 			element: null,
 			frameRate: 60,
 			#if !web fullscreen: false, #end
-			height: 480,
+			height: 580,
 			hidden: #if munit true #else false #end,
 			maximized: false,
 			minimized: false,
 			parameters: {},
-			resizable: false,
+			resizable: true,
 			title: "OceanTarzan",
-			width: 640,
+			width: 740,
 			x: null,
 			y: null,
 		};

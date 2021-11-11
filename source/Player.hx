@@ -7,6 +7,10 @@ import openfl.sensors.Accelerometer;
 class Player extends FlxSprite
 {
 	public var touchingground:Bool;
+	public var facingLeft:Bool;
+	public var fakeVelocityX:Float = 0;
+
+	var lastPosX:Float;
 
 	public function new(x, y)
 	{
@@ -45,10 +49,12 @@ class Player extends FlxSprite
 		if (FlxG.keys.pressed.LEFT || FlxG.keys.pressed.A)
 		{
 			x -= elapsed * 100;
+			facingLeft = true;
 		}
 		if (FlxG.keys.pressed.RIGHT || FlxG.keys.pressed.D)
 		{
 			x += elapsed * 100;
+			facingLeft = false;
 		}
 		if (FlxG.keys.pressed.UP || FlxG.keys.pressed.W)
 		{
@@ -66,6 +72,8 @@ class Player extends FlxSprite
 		{
 			respawn();
 		}
+		fakeVelocityX = x - lastPosX;
+		lastPosX = x;
 		super.update(elapsed);
 	}
 }
