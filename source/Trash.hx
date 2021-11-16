@@ -2,6 +2,7 @@ package;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.util.FlxColor;
 
 class Trash extends FlxSprite
 {
@@ -11,8 +12,7 @@ class Trash extends FlxSprite
 	{
 		super(x, y);
 		loadGraphic("assets/images/Trash.png", true, 32, 32);
-		animation.randomFrame(); // nice
-		trace(animation.frameIndex);
+		animation.frameIndex = FlxG.random.int(0, 4);
 		setGraphicSize(100, 100);
 	}
 

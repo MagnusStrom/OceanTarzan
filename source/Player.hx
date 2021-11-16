@@ -12,6 +12,9 @@ class Player extends FlxSprite
 
 	var lastPosX:Float;
 
+	public var spawnx:Float;
+	public var spawny:Float;
+
 	public function new(x, y)
 	{
 		super(x, y);
@@ -35,12 +38,14 @@ class Player extends FlxSprite
 	// respawn
 	public function respawn()
 	{
-		x = 100;
-		y = 100;
+		x = spawnx;
+		y = spawny;
 		velocity.x = 0;
 		velocity.y = 0;
 		touchingground = false;
 		animation.play("idle");
+		FlxG.sound.play("assets/sounds/Dead.wav");
+		// PlayState.ropesLeft = 3;
 	}
 
 	override public function update(elapsed:Float):Void
@@ -59,6 +64,7 @@ class Player extends FlxSprite
 		{
 			if (touchingground)
 			{
+				FlxG.sound.play("assets/sounds/Jump.wav");
 				velocity.y = -200;
 			}
 			// y -= elapsed * 100;
@@ -67,8 +73,12 @@ class Player extends FlxSprite
 		{
 			y += elapsed * 100;
 		}
-		if (FlxG.keys.pressed.R || y > FlxG.height)
+		if (FlxG.keys.pressed.R || y > FlxG.height && !FlxG.mouse.pressedRight && visible)
 		{
+			//	if ( < 0)
+			//	{
+			// Player is dead
+			//	}
 			respawn();
 		}
 		fakeVelocityX = x - lastPosX;

@@ -8,10 +8,13 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.addons.text.FlxTypeText;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.text.FlxText;
+import flixel.ui.FlxBar;
 import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
+import flixel.util.FlxTimer;
 import hxmath.math.Vector2;
 
 using echo.FlxEcho;
@@ -28,16 +31,39 @@ class PlayState extends FlxState
 	var mouseused:Bool;
 	var debug:FlxText;
 	var level:Int = 0;
-	var savedlevel:Int = -1;
 	var levelText:FlxText;
-	var tutorialText:FlxText;
+	var tutorialText:FlxTypeText;
 	var connected:Bool = false;
 	var launch:Bool = false;
 	var ropeStartingPointX:Float = 0;
+	var vel:Vector2;
+	var launchMultiplier:Float = 70;
+	var trashRequired:Int = 0;
+	var trashCollected:Int = 0;
+	var colCheck:FlxSprite;
+
+	public var ropesLeft:Int = 0;
+
+	var mapRopes:Int = 3;
+	var ropeBar:FlxBar;
+	var ending:Boat;
+
+	var trashCount:FlxText;
+
+	var dialouge:Array<String> = [
+		"Hey! Are you the Ninja-For-Hire we ordered?", "We need your help! There's trash everywhere and we need to get it out of the ocean!",
+		"We've set up a boat at the bottom for you, but we need you to retrive the trash above it!",
+		"Ocean exploration is a little different than normal, so I'll teach you how to move.", "Use A, D, Or left and right to move.", "Use W to jump.",
+		"You can also use S to fall down faster.", "You're a pro! Now we just need you to get the trash and get to the boat!",
+		"Jump off the platform and click and hold on the orange block to swing.", "Swing into the trash to pick it up!",
+		"Great job! Now we just need you to get to the boat!", "Congratulations Ninja! You've completed the tutorial!"
+	];
+	var dialougeIndex:Int = 0;
+
+	var endingStarted:Bool = false;
 
 	override public function create()
 	{
-		super.create();
 		var bg:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, FlxColor.BLUE);
 		add(bg);
 		FlxG.fixedTimestep = false;
@@ -61,44 +87,112 @@ class PlayState extends FlxState
 		//	ground.add(new Ground(0, FlxG.height - 50, 200, 50));
 		debug = new FlxText(100, 100, FlxG.width, "Rope to load debug stats.");
 		debug.color = FlxColor.WHITE;
-		add(debug);
+		// add(debug);
+		levelText = new FlxText(0, 0, FlxG.width, "Level " + level);
+		add(levelText);
+		trashCount = new FlxText(FlxG.width - 500, 10, FlxG.width, "Trash: " + trashCollected + "/" + trashRequired, 17);
+		add(trashCount);
+		ending = new Boat(650, FlxG.height - 40);
+		add(ending);
+		// TODO: add trash image
+
+		// hardcoding so i can force myself to suffer later
+		loadLevel(0);
+		super.create();
 	}
 
 	// Load New Level
 	inline function loadLevel(level:Int)
 	{
-		savedlevel = level;
-		levelText = new FlxText(0, 0, FlxG.width, "Level " + level);
-		add(levelText);
+		levelText.text = "Level " + level;
+		ground.clear();
+		trash.clear();
+		trashCollected = 0;
+		remove(tutorialText);
+		player.visible = true;
+		remove(ending);
 		switch (level)
 		{
 			case 0:
 				// Level 1
-				player.x = 100;
-				player.y = 100;
-				ground.add(new Ground(100, 200, 100, 10));
-				ground.add(new Ground(500, FlxG.height - 50, 200, 50));
-				tutorialText = new FlxText(300, 100, FlxG.width,
-					"Jump off the platform and \nClick and hold to swing.\nCollect the trash and get to the green!", 10);
+				player.spawnx = 100;
+				player.spawny = 100;
+				ground.add(new Ground(100, 300, 100, 10));
+
+				var lul = new Ground(535, 86, 30, 30);
+				lul.color = FlxColor.ORANGE;
+				ground.add(lul);
+
+				dialougeIndex = 0;
+				tutorialText = new FlxTypeText(FlxG.width - 650, 70, 400, dialouge[dialougeIndex] + "\nPress Z to continue", 15);
 				add(tutorialText);
-				trash.add(new Trash(400, 200));
-				trash.add(new Trash(200, FlxG.height - 200));
+				tutorialText.start(0.02, true, false);
+				trash.add(new Trash(400, 400));
+				mapRopes = 1;
+				trashRequired = 1;
+				ending = new Boat(650, FlxG.height - 40);
+				add(ending);
+				colCheck = new FlxSprite(FlxG.mouse.x, FlxG.mouse.y).makeGraphic(10, 10, FlxColor.TRANSPARENT);
+				add(colCheck);
+			case 1:
+				// Level 2
+				ending = new Boat(650, FlxG.height - 40);
+				add(ending);
+				player.spawnx = 100;
+				player.spawny = FlxG.height - 500;
+				ground.add(new Ground(100, FlxG.height - 300, 100, 10));
+				ground.add(new Ground(529, 173, 100, 10));
+				trash.add(new Trash(570, 100));
+				mapRopes = 5;
+				trashRequired = 1;
 		}
+		ropesLeft = mapRopes;
+		remove(ropeBar);
+		ropeBar = new FlxBar(10, 10, FlxBarFillDirection.LEFT_TO_RIGHT, 150, 50, this, "ropesLeft", 0, mapRopes, true);
+		add(ropeBar);
+		ropeBar.createFilledBar(FlxColor.BLACK, FlxColor.GREEN, true, FlxColor.BLUE);
+		trashCount.text = "Trash: " + trashCollected + "/" + trashRequired;
+		player.x = player.spawnx;
+		player.y = player.spawny;
+		player.velocity.x = 0;
+		player.velocity.y = 0;
 	}
 
 	function collectTrash(player:FlxObject, trash:FlxObject)
 	{
 		trash.kill();
+		trashCollected++;
+		trashCount.text = "Trash: " + trashCollected + "/" + trashRequired;
+		if (level == 0)
+		{ // no need to check dialouge because we checked it last time and theres no other place it could be
+			dialougeIndex = 10;
+			tutorialText.resetText(dialouge[dialougeIndex]);
+			tutorialText.start(0.02, true, false);
+		}
+		FlxG.sound.play("assets/sounds/TrashCollect.wav");
+	}
+
+	function endLevel(player:FlxObject, ending:FlxObject)
+	{
+		if (trashCollected == trashRequired && !endingStarted)
+		{
+			endingStarted = true;
+			// animation shit
+			player.visible = false;
+			ending.acceleration.x = 70;
+			new FlxTimer().start(3, function(timer:FlxTimer)
+			{
+				endingStarted = false;
+				trace("DONE");
+				loadLevel(level + 1);
+				level++;
+			});
+		}
 	}
 
 	override public function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		// load level if not loaded
-		if (level > savedlevel)
-		{
-			loadLevel(level);
-		}
 		// GRAVITY CUYZ IUT WANTS IT HERE AN A+M LAZY
 		if (FlxG.collide(player, ground))
 		{
@@ -111,6 +205,7 @@ class PlayState extends FlxState
 
 		FlxG.overlap(player, trash, collectTrash);
 
+		FlxG.overlap(player, ending, endLevel);
 		// stolen from other game that flopped cuz no good physics :(
 
 		if (FlxG.keys.anyPressed([E, M, Q]))
@@ -123,15 +218,44 @@ class PlayState extends FlxState
 		}
 
 		if (FlxG.mouse.justPressed)
-		{ // hopefully this works
-			connected = true;
-			player.animation.play("swingL");
-			mouseused = true;
-			var rope = Verlet.rope([new Vector2(FlxG.mouse.x, FlxG.mouse.y), new Vector2(player.x, player.y)], 0.7, [0]); // verlet.add(rope);
-			verlet.composites.push(rope);
-			// track starting point of rope
-			ropeStartingPointX = player.x;
-			trace("Rope added");
+		{
+			if (level == 0)
+			{
+				colCheck.x = FlxG.mouse.x;
+				colCheck.y = FlxG.mouse.y;
+				if (FlxG.overlap(ground.members[1], colCheck) && dialougeIndex == 8)
+				{
+					FlxG.sound.play("assets/sounds/Grapple.wav");
+					dialougeIndex = 9;
+					tutorialText.resetText(dialouge[dialougeIndex]);
+					tutorialText.start(0.02, true, false);
+					connected = true;
+					player.animation.play("swingL");
+					mouseused = true;
+					var rope = Verlet.rope([new Vector2(FlxG.mouse.x, FlxG.mouse.y), new Vector2(player.x, player.y)], 0.7, [0]); // verlet.add(rope);
+					verlet.composites.push(rope);
+					// track starting point of rope
+					ropeStartingPointX = player.x;
+					ropesLeft -= 1;
+					ropeBar.createFilledBar(FlxColor.BLACK, FlxColor.GREEN, true, FlxColor.BLUE);
+					trace("Rope added");
+				}
+			}
+			else if (ropesLeft > 0)
+			{ // hopefully this works
+				FlxG.sound.play("assets/sounds/Grapple.wav");
+				connected = true;
+				player.animation.play("swingL");
+				mouseused = true;
+				var rope = Verlet.rope([new Vector2(FlxG.mouse.x, FlxG.mouse.y), new Vector2(player.x, player.y)], 0.7, [0]); // verlet.add(rope);
+				verlet.composites.push(rope);
+				// track starting point of rope
+				ropeStartingPointX = player.x;
+				ropesLeft -= 1;
+				ropeBar.createFilledBar(FlxColor.BLACK, FlxColor.GREEN, true, FlxColor.BLUE);
+				trace("Rope added");
+			}
+			// tutorial shit
 		}
 
 		if (mouseused)
@@ -151,18 +275,15 @@ class PlayState extends FlxState
 			}
 
 			// debug
-			debug.text = "DEBUG:\nSTARTING ROPE POINT:"
-				+ ropeStartingPointX
-				+ "\nROPE POINT 1:"
-				+ ropepoints[0].x + "\nROPE POINT 2:" + ropepoints[1].x
-					+ "\nPLAYER X:"
-					+ player.x
-					+ "\nPLAYER Y:"
-					+ player.y;
+			var pos = ropepoints[1].get_position();
+			vel = (pos - ropepoints[1].get_last_position()) * verlet.drag;
+			debug.text = "DEBUG:\nROPE VELOCITY X: " + vel.x + "\nROPE VELOCITY Y: " + vel.y;
 		}
 
-		if (FlxG.mouse.justReleased)
+		if (FlxG.mouse.justReleased && mouseused)
 		{
+			if (level == 0)
+				colCheck.visible = false;
 			verlet.composites.pop();
 			player.animation.play("idle");
 			mouseused = false;
@@ -178,25 +299,40 @@ class PlayState extends FlxState
 						player.velocity.x = (ropepoints[ropepoints.length - 1].dx - (!launch ? (player.drag.x / 4) : 0)) * (!player.facingLeft ? -1 : 1);
 				}*/
 
-				if (ropeStartingPointX > player.x)
-				{
-					trace("Player is swinging left.");
-					player.velocity.x = (ropepoints[ropepoints.length - 1].dx - (player.drag.x / 4)) * -1;
-				}
-				else
-				{
-					trace("Player is swinging right.");
-					player.velocity.x = ropepoints[ropepoints.length - 1].dx - (player.drag.x / 4);
-				}
+				player.velocity.x = vel.x * launchMultiplier;
 				// player.velocity.y = ropepoints[ropepoints.length - 1].dy - (player.drag.y / 2);
 				// player.velocity.x = (ropeStartingPointX - player.x) * -1;
-				player.velocity.y = !launch ? 0 : -400;
+				player.velocity.y = !launch ? (vel.y * launchMultiplier) : (vel.y * launchMultiplier) - 400;
 			}
 			// clear rope
 			FlxSpriteUtil.fill(lineSprite, FlxColor.TRANSPARENT);
 			trace("Rope removed");
 		}
 
+		// Second player management class because I'm lazy
+		if (FlxG.keys.pressed.R || player.y > FlxG.height && !FlxG.mouse.pressedRight && player.visible)
+		{
+			ropesLeft = mapRopes;
+			trashCollected = 0;
+			loadLevel(level);
+		}
+
+		// TUTORIAL
+		if (level == 0)
+		{
+			if (FlxG.keys.justPressed.Z && dialougeIndex < 8)
+			{
+				dialougeIndex++;
+				tutorialText.resetText(dialouge[dialougeIndex]);
+				tutorialText.start(0.02, true, false);
+			}
+		}
+
+		// debug
+		if (FlxG.keys.pressed.L)
+		{
+			trace(FlxG.mouse.x + " " + FlxG.mouse.y);
+		}
 		// unused untill latrer ig
 
 		// Turn rope points into FlxPoints
