@@ -10,6 +10,8 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.text.FlxTypeText;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.system.FlxAssets;
+import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;
 import flixel.util.FlxColor;
@@ -100,6 +102,11 @@ class PlayState extends FlxState
 
 		// hardcoding so i can force myself to suffer later
 		loadLevel(0);
+		var gamerbox = new FlxSprite(1670, FlxG.height - 40).makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		add(gamerbox);
+		gamerbox.screenCenter();
+		gamerbox.acceleration.x = -700;
+
 		super.create();
 	}
 
@@ -127,6 +134,7 @@ class PlayState extends FlxState
 
 				dialougeIndex = 0;
 				tutorialText = new FlxTypeText(FlxG.width - 650, 70, 400, dialouge[dialougeIndex] + "\nPress Z to continue", 15);
+				// tutorialText.sounds = [new FlxSound().loadEmbedded("assets/sounds/DIALOUGE.wav")];
 				add(tutorialText);
 				tutorialText.start(0.02, true, false);
 				trash.add(new Trash(400, 400));
@@ -163,14 +171,19 @@ class PlayState extends FlxState
 				dialougeIndex = 12;
 				tutorialText = new FlxTypeText(FlxG.width - 650, 70, 400, dialouge[dialougeIndex], 15);
 				add(tutorialText);
+				//	tutorialText.sounds = [new FlxSound().loadEmbedded("assets/sounds/DIALOUGE.wav")];
 				tutorialText.start(0.02, true, false);
 			case 3:
 				// Level 4
+				trashRequired = 3;
 				ending = new Boat(650, FlxG.height - 40);
 				add(ending);
 				player.spawnx = 100;
 				player.spawny = 0;
 				ground.add(new Ground(100, 100, 100, 10));
+				trash.add(new Trash(114, 220));
+				trash.add(new Trash(428, 290));
+				trash.add(new Trash(614, 408));
 		}
 		ropesLeft = mapRopes;
 		remove(ropeBar);
@@ -207,7 +220,7 @@ class PlayState extends FlxState
 		FlxG.sound.play("assets/sounds/TrashCollect.wav");
 	}
 
-	function endLevel(player:FlxObject, ending:FlxObject)
+	function endLevel(player:FlxObject, ending:Boat)
 	{
 		if (trashCollected == trashRequired && !endingStarted)
 		{
@@ -215,12 +228,14 @@ class PlayState extends FlxState
 			// animation shit
 			player.visible = false;
 			ending.acceleration.x = 70;
+			ending.animation.play("run");
 			if (level == 0)
 			{
 				dialougeIndex = 11;
 				tutorialText.resetText(dialouge[dialougeIndex]);
 				tutorialText.start(0.02, true, false);
 			}
+			FlxG.sound.play("assets/sounds/Ending.wav");
 			new FlxTimer().start(3, function(timer:FlxTimer)
 			{
 				endingStarted = false;
@@ -351,11 +366,12 @@ class PlayState extends FlxState
 		}
 
 		// Second player management class because I'm lazy
-		if (FlxG.keys.pressed.R || player.y > FlxG.height && !FlxG.mouse.pressedRight && player.visible)
+		if (FlxG.keys.justPressed.R || player.y > FlxG.height && !FlxG.mouse.pressedRight && player.visible)
 		{
 			ropesLeft = mapRopes;
 			trashCollected = 0;
 			loadLevel(level);
+			FlxG.sound.play("assets/sounds/Dead.wav");
 		}
 
 		// TUTORIAL

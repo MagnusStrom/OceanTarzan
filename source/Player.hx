@@ -44,7 +44,6 @@ class Player extends FlxSprite
 		velocity.y = 0;
 		touchingground = false;
 		animation.play("idle");
-		FlxG.sound.play("assets/sounds/Dead.wav");
 		// PlayState.ropesLeft = 3;
 	}
 
@@ -73,7 +72,7 @@ class Player extends FlxSprite
 		{
 			y += elapsed * 100;
 		}
-		if (FlxG.keys.pressed.R || y > FlxG.height && !FlxG.mouse.pressedRight && visible)
+		if (FlxG.keys.justPressed.R || y > FlxG.height && !FlxG.mouse.pressedRight && visible)
 		{
 			//	if ( < 0)
 			//	{

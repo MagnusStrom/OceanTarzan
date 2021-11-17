@@ -13,8 +13,9 @@ class Boat extends FlxSprite
 		super(x, y);
 		immovable = true;
 		loadGraphic("assets/images/Boat.png", true, 32, 32);
+		animation.add("idle", [0], 1, false);
 		animation.add("run", [1, 2], 3, true);
-		animation.play("run");
+		animation.play("idle");
 		setGraphicSize(250, 250);
 		width = 250;
 		height = 250;
