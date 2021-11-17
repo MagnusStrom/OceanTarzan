@@ -56,7 +56,9 @@ class PlayState extends FlxState
 		"Ocean exploration is a little different than normal, so I'll teach you how to move.", "Use A, D, Or left and right to move.", "Use W to jump.",
 		"You can also use S to fall down faster.", "You're a pro! Now we just need you to get the trash and get to the boat!",
 		"Jump off the platform and click and hold on the orange block to swing.", "Swing into the trash to pick it up!",
-		"Great job! Now we just need you to get to the boat!", "Congratulations Ninja! You've completed the tutorial!"
+		"Great job! Now we just need you to get to the boat!", "Congratulations Ninja! You've completed the tutorial!",
+		"Hey Ninja! Hold E while letting go of your rope to fly upwards!\nThis is called a launch.",
+		"Congratulations Ninja! Now head down to the boat, there's oceans to clean!"
 	];
 	var dialougeIndex:Int = 0;
 
@@ -139,12 +141,36 @@ class PlayState extends FlxState
 				ending = new Boat(650, FlxG.height - 40);
 				add(ending);
 				player.spawnx = 100;
+				player.spawny = 0;
+				ground.add(new Ground(100, 100, 100, 10));
+				ground.add(new Ground(576, 333, 100, 10));
+				ground.add(new Ground(99, 464, 100, 10));
+				trash.add(new Trash(654, 220));
+				trash.add(new Trash(130, 410));
+				mapRopes = 5;
+				trashRequired = 2;
+			case 2:
+				// Level 3
+				ending = new Boat(650, FlxG.height - 40);
+				add(ending);
+				player.spawnx = 100;
 				player.spawny = FlxG.height - 500;
 				ground.add(new Ground(100, FlxG.height - 300, 100, 10));
-				ground.add(new Ground(529, 173, 100, 10));
-				trash.add(new Trash(570, 100));
+				ground.add(new Ground(529, 150, 100, 10));
+				trash.add(new Trash(500, 100));
 				mapRopes = 5;
 				trashRequired = 1;
+				dialougeIndex = 12;
+				tutorialText = new FlxTypeText(FlxG.width - 650, 70, 400, dialouge[dialougeIndex], 15);
+				add(tutorialText);
+				tutorialText.start(0.02, true, false);
+			case 3:
+				// Level 4
+				ending = new Boat(650, FlxG.height - 40);
+				add(ending);
+				player.spawnx = 100;
+				player.spawny = 0;
+				ground.add(new Ground(100, 100, 100, 10));
 		}
 		ropesLeft = mapRopes;
 		remove(ropeBar);
@@ -169,6 +195,15 @@ class PlayState extends FlxState
 			tutorialText.resetText(dialouge[dialougeIndex]);
 			tutorialText.start(0.02, true, false);
 		}
+		else if (level == 2)
+		{
+			if (trashCollected == trashRequired)
+			{
+				dialougeIndex = 13;
+				tutorialText.resetText(dialouge[dialougeIndex]);
+				tutorialText.start(0.02, true, false);
+			}
+		}
 		FlxG.sound.play("assets/sounds/TrashCollect.wav");
 	}
 
@@ -180,6 +215,12 @@ class PlayState extends FlxState
 			// animation shit
 			player.visible = false;
 			ending.acceleration.x = 70;
+			if (level == 0)
+			{
+				dialougeIndex = 11;
+				tutorialText.resetText(dialouge[dialougeIndex]);
+				tutorialText.start(0.02, true, false);
+			}
 			new FlxTimer().start(3, function(timer:FlxTimer)
 			{
 				endingStarted = false;
