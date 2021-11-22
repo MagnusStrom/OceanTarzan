@@ -5,6 +5,7 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.transition.TransitionData;
+import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
@@ -12,10 +13,16 @@ import flixel.util.FlxTimer;
 class TitleState extends FlxState
 {
 	var bg:FlxSprite;
+	var cum:FlxSound;
+	var vroom:FlxSound;
 
 	override public function create():Void
 	{
 		super.create();
+		cum = new FlxSound().loadEmbedded("assets/sounds/MainMenu.wav");
+		cum.looped = true;
+		cum.play();
+		vroom = new FlxSound().loadEmbedded("assets/sounds/Vroom.wav");
 		bg = new FlxSprite(0, 0).loadGraphic("assets/images/StartingBG.png", true, 32, 32);
 		bg.animation.add('idle', [0, 1], 0.6, true);
 		bg.setGraphicSize(FlxG.width, FlxG.width);
@@ -56,8 +63,11 @@ class TitleState extends FlxState
 			gamerboat.animation.add("idle", [1, 2], 1, true);
 			gamerboat.animation.play("idle");
 			gamerboat.flipX = true;
+			cum.stop();
+			vroom.play();
 			new FlxTimer().start(3.5, function(timer:FlxTimer)
 			{
+				vroom.stop();
 				FlxG.switchState(new PlayState());
 			});
 		}

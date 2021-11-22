@@ -18,12 +18,14 @@ class Player extends FlxSprite
 	public function new(x, y)
 	{
 		super(x, y);
-		loadGraphic("assets/images/Ninjah.png", true, 32, 32);
+		loadGraphic("assets/images/Ninjah2.png", true, 14, 22);
 		animation.add("idle", [0, 1], 2, true);
-		animation.add("swingL", [3], 1, true);
-		animation.add("swingR", [2], 1, true);
+		animation.add("swing", [2], 1, true);
+		animation.add("fall", [3], 1, true);
+		animation.add("hapi", [4], 1, true);
+		animation.add("jump", [5], 1, true);
 		animation.play("idle");
-		setGraphicSize(100, 100);
+		setGraphicSize(70, 110);
 		updateHitbox();
 		width = 30;
 		offset.x = 5;
@@ -64,13 +66,15 @@ class Player extends FlxSprite
 			if (touchingground)
 			{
 				FlxG.sound.play("assets/sounds/Jump.wav");
+				animation.play("jump");
 				velocity.y = -200;
 			}
 			// y -= elapsed * 100;
 		}
 		if (FlxG.keys.pressed.DOWN || FlxG.keys.pressed.S)
 		{
-			y += elapsed * 100;
+			if (!touchingground)
+				y += elapsed * 300;
 		}
 		if (FlxG.keys.justPressed.R || y > FlxG.height && !FlxG.mouse.pressedRight && visible)
 		{

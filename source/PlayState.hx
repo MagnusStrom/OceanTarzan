@@ -51,16 +51,21 @@ class PlayState extends FlxState
 	var ending:Boat;
 
 	var trashCount:FlxText;
+	var tutorialBoxShit:FlxSprite;
+	var vroom:FlxSound;
+	var errorTXT:FlxTypeText;
 
 	var dialouge:Array<String> = [
-		"Hey! Are you the Ninja-For-Hire we ordered?", "We need your help! There's trash everywhere and we need to get it out of the ocean!",
-		"We've set up a boat at the bottom for you, but we need you to retrive the trash above it!",
-		"Ocean exploration is a little different than normal, so I'll teach you how to move.", "Use A, D, Or left and right to move.", "Use W to jump.",
-		"You can also use S to fall down faster.", "You're a pro! Now we just need you to get the trash and get to the boat!",
-		"Jump off the platform and click and hold on the orange block to swing.", "Swing into the trash to pick it up!",
-		"Great job! Now we just need you to get to the boat!", "Congratulations Ninja! You've completed the tutorial!",
+		"Welcome to Atlantis, Ninja!", "I'm glad the PolySeas foundation sent you to give us a hand.",
+		"We need your help! There's trash everywhere and we need to get it out of our city!",
+		"We tried to do it ourselves, but when we tried, the trash got stuck on our fins, so we can't swim!",
+		"We've set up a transit boat at the bottom for you, but we need you to retrive the trash above it!",
+		"Ocean exploration is a little different than normal, and due to the high water pressure, you can't swim! So I'll teach you how to move.",
+		"Use A, D, Or left and right to move.", "Use W or up arrow to jump.", "Great job! You're a pro!",
+		"Now we just need you to get the trash and get to the boat!", "Jump off the platform and click and hold on the orange block to swing.",
+		"Swing into the trash to pick it up!", "Great job! Now we just need you to get to the boat!", "Congratulations Ninja! You've completed the tutorial!",
 		"Hey Ninja! Hold E while letting go of your rope to fly upwards!\nThis is called a launch.",
-		"Congratulations Ninja! Now head down to the boat, there's oceans to clean!"
+		"Congratulations! Now head down to the boat, there's oceans to clean!"
 	];
 	var dialougeIndex:Int = 0;
 
@@ -70,6 +75,8 @@ class PlayState extends FlxState
 	{
 		var bg:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, FlxColor.BLUE);
 		add(bg);
+		vroom = new FlxSound().loadEmbedded("assets/sounds/Vroom.mp3");
+
 		FlxG.fixedTimestep = false;
 		player = new Player(100, 100);
 		add(player);
@@ -118,6 +125,7 @@ class PlayState extends FlxState
 		trash.clear();
 		trashCollected = 0;
 		remove(tutorialText);
+		remove(tutorialBoxShit);
 		player.visible = true;
 		remove(ending);
 		switch (level)
@@ -128,10 +136,8 @@ class PlayState extends FlxState
 				player.spawny = 100;
 				ground.add(new Ground(100, 300, 100, 10));
 
-				var lul = new Ground(535, 86, 30, 30);
-				lul.color = FlxColor.ORANGE;
-				ground.add(lul);
-
+				tutorialBoxShit = new FlxSprite(535, 86).makeGraphic(30, 30, FlxColor.ORANGE);
+				add(tutorialBoxShit);
 				dialougeIndex = 0;
 				tutorialText = new FlxTypeText(FlxG.width - 650, 70, 400, dialouge[dialougeIndex] + "\nPress Z to continue", 15);
 				// tutorialText.sounds = [new FlxSound().loadEmbedded("assets/sounds/DIALOUGE.wav")];
@@ -145,6 +151,7 @@ class PlayState extends FlxState
 				colCheck = new FlxSprite(FlxG.mouse.x, FlxG.mouse.y).makeGraphic(10, 10, FlxColor.TRANSPARENT);
 				add(colCheck);
 			case 1:
+				// HARDCODE THIS
 				// Level 2
 				ending = new Boat(650, FlxG.height - 40);
 				add(ending);
@@ -168,7 +175,7 @@ class PlayState extends FlxState
 				trash.add(new Trash(500, 100));
 				mapRopes = 5;
 				trashRequired = 1;
-				dialougeIndex = 12;
+				dialougeIndex = 14;
 				tutorialText = new FlxTypeText(FlxG.width - 650, 70, 400, dialouge[dialougeIndex], 15);
 				add(tutorialText);
 				//	tutorialText.sounds = [new FlxSound().loadEmbedded("assets/sounds/DIALOUGE.wav")];
@@ -204,7 +211,7 @@ class PlayState extends FlxState
 		trashCount.text = "Trash: " + trashCollected + "/" + trashRequired;
 		if (level == 0)
 		{ // no need to check dialouge because we checked it last time and theres no other place it could be
-			dialougeIndex = 10;
+			dialougeIndex++;
 			tutorialText.resetText(dialouge[dialougeIndex]);
 			tutorialText.start(0.02, true, false);
 		}
@@ -212,7 +219,7 @@ class PlayState extends FlxState
 		{
 			if (trashCollected == trashRequired)
 			{
-				dialougeIndex = 13;
+				dialougeIndex++;
 				tutorialText.resetText(dialouge[dialougeIndex]);
 				tutorialText.start(0.02, true, false);
 			}
@@ -231,17 +238,19 @@ class PlayState extends FlxState
 			ending.animation.play("run");
 			if (level == 0)
 			{
-				dialougeIndex = 11;
+				dialougeIndex++;
 				tutorialText.resetText(dialouge[dialougeIndex]);
 				tutorialText.start(0.02, true, false);
 			}
 			FlxG.sound.play("assets/sounds/Ending.wav");
+			vroom.play();
 			new FlxTimer().start(3, function(timer:FlxTimer)
 			{
 				endingStarted = false;
 				trace("DONE");
 				loadLevel(level + 1);
 				level++;
+				vroom.stop();
 			});
 		}
 	}
@@ -279,10 +288,10 @@ class PlayState extends FlxState
 			{
 				colCheck.x = FlxG.mouse.x;
 				colCheck.y = FlxG.mouse.y;
-				if (FlxG.overlap(ground.members[1], colCheck) && dialougeIndex == 8)
+				if (FlxG.overlap(tutorialBoxShit, colCheck) && dialougeIndex == 10)
 				{
 					FlxG.sound.play("assets/sounds/Grapple.wav");
-					dialougeIndex = 9;
+					dialougeIndex++;
 					tutorialText.resetText(dialouge[dialougeIndex]);
 					tutorialText.start(0.02, true, false);
 					connected = true;
@@ -299,17 +308,34 @@ class PlayState extends FlxState
 			}
 			else if (ropesLeft > 0)
 			{ // hopefully this works
-				FlxG.sound.play("assets/sounds/Grapple.wav");
-				connected = true;
-				player.animation.play("swingL");
-				mouseused = true;
-				var rope = Verlet.rope([new Vector2(FlxG.mouse.x, FlxG.mouse.y), new Vector2(player.x, player.y)], 0.7, [0]); // verlet.add(rope);
-				verlet.composites.push(rope);
-				// track starting point of rope
-				ropeStartingPointX = player.x;
-				ropesLeft -= 1;
-				ropeBar.createFilledBar(FlxColor.BLACK, FlxColor.GREEN, true, FlxColor.BLUE);
-				trace("Rope added");
+				if (player.y < FlxG.mouse.y)
+				{
+					// cannot grapple
+					errorTXT = new FlxTypeText(FlxG.width - 650, 70, 400, "You can't swing when you're above the rope!", 15);
+					// tutorialText.sounds = [new FlxSound().loadEmbedded("assets/sounds/DIALOUGE.wav")];
+					add(errorTXT);
+					errorTXT.start(0.02, true, false, [], function():Void
+					{
+						new FlxTimer().start(1, function(timer:FlxTimer)
+						{
+							remove(errorTXT);
+						});
+					});
+				}
+				else
+				{
+					FlxG.sound.play("assets/sounds/Grapple.wav");
+					connected = true;
+					player.animation.play("swing");
+					mouseused = true;
+					var rope = Verlet.rope([new Vector2(FlxG.mouse.x, FlxG.mouse.y), new Vector2(player.x, player.y)], 0.7, [0]); // verlet.add(rope);
+					verlet.composites.push(rope);
+					// track starting point of rope
+					ropeStartingPointX = player.x;
+					ropesLeft -= 1;
+					ropeBar.createFilledBar(FlxColor.BLACK, FlxColor.GREEN, true, FlxColor.BLUE);
+					trace("Rope added");
+				}
 			}
 			// tutorial shit
 		}
@@ -377,10 +403,10 @@ class PlayState extends FlxState
 		// TUTORIAL
 		if (level == 0)
 		{
-			if (FlxG.keys.justPressed.Z && dialougeIndex < 8)
+			if (FlxG.keys.justPressed.Z && dialougeIndex < 10)
 			{
 				dialougeIndex++;
-				tutorialText.resetText(dialouge[dialougeIndex]);
+				tutorialText.resetText(dialouge[dialougeIndex] + "\n" + dialougeIndex);
 				tutorialText.start(0.02, true, false);
 			}
 		}
