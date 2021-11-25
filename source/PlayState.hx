@@ -58,7 +58,7 @@ class PlayState extends FlxState
 	var dialouge:Array<String> = [
 		"Welcome to Atlantis, Ninja!", "I'm glad the PolySeas foundation sent you to give us a hand.",
 		"We need your help! There's trash everywhere and we need to get it out of our city!",
-		"We tried to do it ourselves, but when we tried, the trash got stuck on our fins, so we can't swim!",
+		"We tried to do it ourselves, but when we tried, the trash got stuck on our fins, and made it so we can't swim!",
 		"We've set up a transit boat at the bottom for you, but we need you to retrive the trash above it!",
 		"Ocean exploration is a little different than normal, and due to the high water pressure, you can't swim! So I'll teach you how to move.",
 		"Use A, D, Or left and right to move.", "Use W or up arrow to jump.", "Great job! You're a pro!",
@@ -191,6 +191,14 @@ class PlayState extends FlxState
 				trash.add(new Trash(114, 220));
 				trash.add(new Trash(428, 290));
 				trash.add(new Trash(614, 408));
+			case 4:
+				trashRequired = 2;
+				mapRopes = 4;
+				ground.add(new Ground(100, 170, 100, 10));
+				trash.add(new Trash(486, 47));
+				trash.add(new Trash(112, 415));
+				ending = new Boat(650, FlxG.height - 40);
+				add(ending);
 		}
 		ropesLeft = mapRopes;
 		remove(ropeBar);
@@ -282,6 +290,12 @@ class PlayState extends FlxState
 			launch = false;
 		}
 
+		if (FlxG.keys.justPressed.ONE)
+		{
+			level++;
+			loadLevel(level);
+		}
+
 		if (FlxG.mouse.justPressed)
 		{
 			if (level == 0)
@@ -295,12 +309,15 @@ class PlayState extends FlxState
 					tutorialText.resetText(dialouge[dialougeIndex]);
 					tutorialText.start(0.02, true, false);
 					connected = true;
-					player.animation.play("swingL");
+					player.animation.play("swing");
 					mouseused = true;
-					var rope = Verlet.rope([new Vector2(FlxG.mouse.x, FlxG.mouse.y), new Vector2(player.x, player.y)], 0.7, [0]); // verlet.add(rope);
+					var rope = Verlet.rope([
+						new Vector2(FlxG.mouse.x, FlxG.mouse.y),
+						new Vector2(player.x - (player.width / 2) + 30, player.y)
+					], 0.7, [0]); // verlet.add(rope);
 					verlet.composites.push(rope);
 					// track starting point of rope
-					ropeStartingPointX = player.x;
+					ropeStartingPointX = player.x - (player.width / 2) + 30;
 					ropesLeft -= 1;
 					ropeBar.createFilledBar(FlxColor.BLACK, FlxColor.GREEN, true, FlxColor.BLUE);
 					trace("Rope added");

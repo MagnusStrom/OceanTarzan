@@ -22,7 +22,7 @@ class TitleState extends FlxState
 		cum = new FlxSound().loadEmbedded("assets/sounds/MainMenu.wav");
 		cum.looped = true;
 		cum.play();
-		vroom = new FlxSound().loadEmbedded("assets/sounds/Vroom.wav");
+		vroom = new FlxSound().loadEmbedded("assets/sounds/Vroom.mp3");
 		bg = new FlxSprite(0, 0).loadGraphic("assets/images/StartingBG.png", true, 32, 32);
 		bg.animation.add('idle', [0, 1], 0.6, true);
 		bg.setGraphicSize(FlxG.width, FlxG.width);

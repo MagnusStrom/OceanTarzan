@@ -2,6 +2,7 @@ package;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.math.FlxRect;
 import openfl.sensors.Accelerometer;
 
 class Player extends FlxSprite
@@ -27,14 +28,14 @@ class Player extends FlxSprite
 		animation.play("idle");
 		setGraphicSize(70, 110);
 		updateHitbox();
-		width = 30;
-		offset.x = 5;
-		height = 80;
+		width = 60;
+		offset.x = -25;
+		height = 100;
 		offset.y = -35;
 		// gravity
 		acceleration.y = 400;
 		drag.x = drag.y = 500;
-		// elasticity = 0.05;
+		clipRect = new FlxRect(0, 0, 60, 95);
 	}
 
 	// respawn
@@ -66,7 +67,7 @@ class Player extends FlxSprite
 			if (touchingground)
 			{
 				FlxG.sound.play("assets/sounds/Jump.wav");
-				animation.play("jump");
+				// animation.play("jump");
 				velocity.y = -200;
 			}
 			// y -= elapsed * 100;
