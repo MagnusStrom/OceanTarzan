@@ -35,7 +35,7 @@ class Player extends FlxSprite
 		// gravity
 		acceleration.y = 400;
 		drag.x = drag.y = 500;
-		clipRect = new FlxRect(0, 0, 60, 95);
+		clipRect = new FlxRect(0, 0, 60, 25);
 	}
 
 	// respawn

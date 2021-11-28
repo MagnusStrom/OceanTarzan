@@ -1,5 +1,6 @@
 package;
 
+import echo.util.AABB;
 import echo.util.verlet.Composite;
 import echo.util.verlet.Constraints;
 import echo.util.verlet.Dot;
@@ -30,6 +31,7 @@ class PlayState extends FlxState
 	var lineSprite:FlxSprite;
 	var ground:FlxTypedGroup<Ground>;
 	var trash:FlxTypedGroup<Trash>;
+	var bad:FlxTypedGroup<Bad>;
 	var mouseused:Bool;
 	var debug:FlxText;
 	var level:Int = 0;
@@ -92,6 +94,7 @@ class PlayState extends FlxState
 		lineSprite.makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT);
 		ground = new FlxTypedGroup<Ground>();
 		trash = new FlxTypedGroup<Trash>();
+		bad = new FlxTypedGroup<Bad>();
 		add(ground);
 		add(trash); // how did i forget this bruh
 		// test level
@@ -138,8 +141,16 @@ class PlayState extends FlxState
 
 				tutorialBoxShit = new FlxSprite(535, 86).makeGraphic(30, 30, FlxColor.ORANGE);
 				add(tutorialBoxShit);
-				dialougeIndex = 0;
-				tutorialText = new FlxTypeText(FlxG.width - 650, 70, 400, dialouge[dialougeIndex] + "\nPress Z to continue", 15);
+				// dialougeIndex = 0;
+				if (dialougeIndex == 0)
+					tutorialText = new FlxTypeText(FlxG.width - 650, 70, 400, dialouge[dialougeIndex] + "\nPress Z to continue", 15);
+				else
+				{
+					// theres no other possible idnex that should set in this case
+					if (dialougeIndex > 9)
+						dialougeIndex = 10;
+					tutorialText = new FlxTypeText(FlxG.width - 650, 70, 400, dialouge[dialougeIndex], 15);
+				}
 				// tutorialText.sounds = [new FlxSound().loadEmbedded("assets/sounds/DIALOUGE.wav")];
 				add(tutorialText);
 				tutorialText.start(0.02, true, false);
@@ -197,6 +208,28 @@ class PlayState extends FlxState
 				ground.add(new Ground(100, 170, 100, 10));
 				trash.add(new Trash(486, 47));
 				trash.add(new Trash(112, 415));
+				ending = new Boat(650, FlxG.height - 40);
+				add(ending);
+			case 5:
+				trashRequired = 4;
+				mapRopes = 3;
+				ground.add(new Ground(100, 100, 100, 10));
+				trash.add(new Trash(520, 207));
+				trash.add(new Trash(520, 307));
+				trash.add(new Trash(520, 407));
+				trash.add(new Trash(520, 507));
+				ending = new Boat(650, FlxG.height - 40);
+				add(ending);
+			case 6:
+				trashRequired = 1;
+				mapRopes = 3;
+				ground.add(new Ground(100, FlxG.height - 40, 100, 10));
+				trash.add(new Trash(289, 47));
+				ending = new Boat(650, FlxG.height - 40);
+				player.spawny = FlxG.height - 250;
+				add(ending);
+			case 7:
+				ground.add(new Ground(100, FlxG.height - 40, 100, 10));
 				ending = new Boat(650, FlxG.height - 40);
 				add(ending);
 		}
@@ -402,6 +435,9 @@ class PlayState extends FlxState
 				// player.velocity.y = ropepoints[ropepoints.length - 1].dy - (player.drag.y / 2);
 				// player.velocity.x = (ropeStartingPointX - player.x) * -1;
 				player.velocity.y = !launch ? (vel.y * launchMultiplier) : (vel.y * launchMultiplier) - 400;
+
+				if (launch)
+					FlxG.sound.play("assets/sounds/Jump.wav");
 			}
 			// clear rope
 			FlxSpriteUtil.fill(lineSprite, FlxColor.TRANSPARENT);
@@ -423,7 +459,7 @@ class PlayState extends FlxState
 			if (FlxG.keys.justPressed.Z && dialougeIndex < 10)
 			{
 				dialougeIndex++;
-				tutorialText.resetText(dialouge[dialougeIndex] + "\n" + dialougeIndex);
+				tutorialText.resetText(dialouge[dialougeIndex]);
 				tutorialText.start(0.02, true, false);
 			}
 		}
