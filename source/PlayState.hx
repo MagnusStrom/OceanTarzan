@@ -386,7 +386,7 @@ class PlayState extends FlxState
 				if (player.y < FlxG.mouse.y)
 				{
 					// cannot grapple
-					errorTXT = new FlxTypeText(FlxG.width - 650, 70, 400, "You can't swing when you're above the rope!", 15);
+					errorTXT = new FlxTypeText(FlxG.width - 650, FlxG.height - 50, 400, "You can't swing when you're above the rope!", 15);
 					// tutorialText.sounds = [new FlxSound().loadEmbedded("assets/sounds/DIALOUGE.wav")];
 					add(errorTXT);
 					errorTXT.start(0.02, true, false, [], function():Void
@@ -479,6 +479,7 @@ class PlayState extends FlxState
 			connected = false;
 			disableRope();
 			player.respawn();
+			deaths++;
 			FlxG.sound.play("assets/sounds/Dead.wav");
 		}
 

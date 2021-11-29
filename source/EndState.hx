@@ -53,7 +53,7 @@ class EndState extends FlxState
 
 		var img:FlxSprite = new FlxSprite(0, 0).loadGraphic("assets/images/SEAJAM.png");
 		img.screenCenter();
-		img.y += 100;
+		img.y += 240;
 		add(img);
 	}
 
