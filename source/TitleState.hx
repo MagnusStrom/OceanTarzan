@@ -43,6 +43,11 @@ class TitleState extends FlxState
 		myText2.setBorderStyle(OUTLINE, FlxColor.BLUE, 1);
 		myText2.screenCenter();
 		add(myText2);
+
+		var img:FlxSprite = new FlxSprite(0, 0).loadGraphic("assets/images/SEAJAM.png");
+		img.screenCenter();
+		img.y += 100;
+		add(img);
 	}
 
 	override public function update(elapsed:Float):Void

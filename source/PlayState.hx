@@ -74,6 +74,8 @@ class PlayState extends FlxState
 	var endingStarted:Bool = false;
 	var mouseBlocked:Bool = false;
 
+	var deaths:Int = 0;
+
 	override public function create()
 	{
 		var bg:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, FlxColor.BLUE);
@@ -272,6 +274,8 @@ class PlayState extends FlxState
 				trash.add(new Trash(630, 41));
 				mapRopes = 10;
 				trashRequired = 4;
+			case 11:
+				FlxG.switchState(new EndState(deaths));
 		}
 		ropesLeft = mapRopes;
 		remove(ropeBar);
