@@ -9,11 +9,11 @@ import flixel.FlxSprite;
  */
 class Bad extends FlxSprite
 {
-	public function new(x, y, w, h)
+	public function new(x, y)
 	{
 		super(x, y);
 		loadGraphic("assets/images/FISH.png", false, 13, 7);
-		setGraphicSize(100);
+		setGraphicSize(50);
 		updateHitbox();
 	}
 
