@@ -258,6 +258,20 @@ class PlayState extends FlxState
 				bad.add(new Bad(605, 374));
 				bad.add(new Bad(605, 474));
 				add(ending);
+			case 10:
+				ground.add(new Ground(100, 250, 100, 10));
+				ending = new Boat(650, FlxG.height - 40);
+				add(ending);
+				bad.add(new Bad(346, 151));
+				bad.add(new Bad(533, 67));
+				bad.add(new Bad(464, 375));
+				bad.add(new Bad(199, 68));
+				trash.add(new Trash(392, 23));
+				trash.add(new Trash(6, 412));
+				trash.add(new Trash(387, 309));
+				trash.add(new Trash(630, 41));
+				mapRopes = 10;
+				trashRequired = 4;
 		}
 		ropesLeft = mapRopes;
 		remove(ropeBar);
@@ -328,7 +342,6 @@ class PlayState extends FlxState
 
 		if (FlxG.keys.justPressed.ONE)
 		{
-			level++;
 			loadLevel(level);
 		}
 		// GRAVITY CUYZ IUT WANTS IT HERE AN A+M LAZY
